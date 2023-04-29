@@ -34,7 +34,7 @@ import { Link } from "@nextui-org/react";
 
         <Spacer css={{flex:1}}/>
        <NextLink href={"/favorites"} passHref>
-        <Link css={{marginRight:'10px'}}>
+        <Link css={{marginRight:'20px'}}>
         <Text>Favoritos</Text>
         </Link>
        </NextLink>

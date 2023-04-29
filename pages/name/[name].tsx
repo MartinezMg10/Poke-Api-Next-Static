@@ -1,11 +1,13 @@
 import { GetStaticPaths, GetStaticProps, NextPage } from 'next';
 import { ParsedUrlQuery } from 'querystring';
+import { pokeApi } from '../../api';
 import { Layout } from '../../components/layouts';
 import { Pokemon } from '@/interfaces';
 import { Card, Grid, Text, Button, Container, Image } from '@nextui-org/react';
 import { localFavorites } from '@/utils';
 import { useState, useEffect } from 'react';
 import confetti from 'canvas-confetti'
+import { PokemonListResponse } from '@/interfaces';
 import { getPokemonInfo } from '@/utils/getPokemonInfo';
 
 interface Props {
@@ -13,10 +15,10 @@ interface Props {
 }
 
 interface Params extends ParsedUrlQuery {
-  id: string;
+  name: string;
 }
 
-const PokemonPage: NextPage<Props> = ({ pokemon }) => {
+const PokemonNamePage: NextPage<Props> = ({ pokemon }) => {
   const [isInFavorites, setIsInFavorites] = useState(false);
 
   useEffect(() => {
@@ -103,30 +105,33 @@ const PokemonPage: NextPage<Props> = ({ pokemon }) => {
   );
 };
 
+
 export const getStaticPaths: GetStaticPaths = async (ctx) => {
 
-  const pokemons151 = [...Array(151)].map( ( value, index ) => `${ index + 1 }` );
-
-  return {
-    paths: pokemons151.map( id => ({
-      params: { id }
-    })),
-    fallback: false
-  }
-}
-
-
-
-export const getStaticProps: GetStaticProps = async ({ params }) => {
+    const { data } = await pokeApi.get<PokemonListResponse>('/pokemon?limit=151');
+    const pokemonNames: string[] = data.results.map( pokemon => pokemon.name );
   
-  const { id } = params as { id: string };
-
-  return {
-    props: {
-      pokemon: await getPokemonInfo( id )
+  
+    return {
+      paths: pokemonNames.map( name => ({
+        params: { name }
+      })),
+      fallback: false
     }
   }
-}
+  
+  
+  
+  export const getStaticProps: GetStaticProps = async ({ params }) => {
+    
+    const { name } = params as { name: string };
+  
+    return {
+      props: {
+        pokemon: await getPokemonInfo( name )
+      }
+    }
+  }
+  
 
-
-export default PokemonPage;
+export default PokemonNamePage;
